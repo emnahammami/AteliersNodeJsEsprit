@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="/socket.io/socket.io.js"></script>
+    </head>
+    <body>
+    
+        <h1>Notification</h1>
+        <div class="notification"></div>
+        <div class="typing"></div>
+        <h1>Chat List retrieved from DB ({{Chats.length}})</h1>
+                
+            <table border="1">
+                <tr>
+                    <td><b>Username</b></td>
+                    <td><b>message</b></td>
+                </tr>
+
+                {% for Chat in Chats %}
+                    <tr><td> {{Chat.Username }}</td><td>{{Chat.message }}</td></tr>
+                {% endfor %}
+            </table>
+        
+        <input type="text" class="msg"  />
+        <button onclick="send()" > Send Message </button>
+        <p></p>
+        <script>
+        
+            var messageInput = document.querySelector('.msg');
+
+            messageInput.addEventListener('keyup', () => {
+                socket.emit('typing');
+            });
+
+            const socket = io.connect("ws://localhost:3003");
+
+            socket.on("connection")
+            socket.on('notification',(data)=>{
+                document.querySelector('.notification').innerHTML = data;
+            });
+
+            socket.on('typing',(data)=>{
+                document.querySelector('.typing').innerHTML = data;
+            });
+            socket.on('msg',(data)=>{
+                document.querySelector('p').innerHTML += "<br/> "+data;
+            });
+
+            const send = () =>  {
+                //const msgInput = document.querySelector('.msg');
+                const msg = messageInput.value;
+                socket.emit("msg", msg);
+            } 
+
+            
+        </script>
+    </body>
+</html>
